@@ -1,0 +1,42 @@
+{
+  "expo": {
+    "name": "Smokey Grillz",
+    "slug": "smokey-grillz",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "scheme": "smokeygrillz",
+    "userInterfaceStyle": "dark",
+    "backgroundColor": "#0D0D0F",
+    "ios": {
+      "supportsTablet": false,
+      "bundleIdentifier": "com.smokeygrillz.app"
+    },
+    "android": {
+      "package": "com.smokeygrillz.app",
+      "adaptiveIcon": {
+        "backgroundColor": "#0D0D0F",
+        "foregroundImage": "./assets/adaptive-icon.png"
+      },
+      "predictiveBackGestureEnabled": false
+    },
+    "web": {
+      "output": "static",
+      "favicon": "./assets/favicon.png"
+    },
+    "plugins": [
+      "expo-router",
+      [
+        "expo-splash-screen",
+        {
+          "backgroundColor": "#0D0D0F",
+          "image": "./assets/splash-icon.png",
+          "imageWidth": 220
+        }
+      ]
+    ],
+    "experiments": {
+      "typedRoutes": true
+    }
+  }
+}
