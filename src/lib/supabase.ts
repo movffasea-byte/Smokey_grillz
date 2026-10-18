@@ -11,11 +11,14 @@ if (!url || !key) {
   throw new Error('Missing EXPO_PUBLIC_SUPABASE_URL or EXPO_PUBLIC_SUPABASE_KEY in .env.local');
 }
 
+// Web static rendering runs in Node, where AsyncStorage touches `window`.
+const isServer = typeof window === 'undefined';
+
 export const supabase = createClient<Database>(url, key, {
   auth: {
-    storage: AsyncStorage,
-    autoRefreshToken: true,
-    persistSession: true,
+    storage: isServer ? undefined : AsyncStorage,
+    autoRefreshToken: !isServer,
+    persistSession: !isServer,
     detectSessionInUrl: false,
   },
 });
