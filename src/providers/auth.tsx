@@ -12,6 +12,7 @@ type AuthState = {
   loading: boolean;
   isStaff: boolean;
   signOut: () => Promise<void>;
+  updateProfile: (fields: { full_name: string; phone: string }) => Promise<void>;
 };
 
 const AuthContext = createContext<AuthState | null>(null);
@@ -59,6 +60,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     await supabase.auth.signOut();
   }, []);
 
+  const updateProfile = useCallback(
+    async (fields: { full_name: string; phone: string }) => {
+      if (!userId) return;
+      const { data, error } = await supabase.from('profiles').update(fields).eq('id', userId).select().single();
+      if (error) throw error;
+      setProfile(data);
+    },
+    [userId],
+  );
+
   const value = useMemo<AuthState>(
     () => ({
       session,
@@ -66,8 +77,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       loading,
       isStaff: profile?.role === 'admin' || profile?.role === 'staff',
       signOut,
+      updateProfile,
     }),
-    [session, profile, loading, signOut],
+    [session, profile, loading, signOut, updateProfile],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

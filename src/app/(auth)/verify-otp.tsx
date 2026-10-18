@@ -1,8 +1,8 @@
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { Screen } from '@/components/ui/Screen';
 import { Button } from '@/components/ui/Button';
 import { TextField } from '@/components/ui/TextField';
 import { supabase } from '@/lib/supabase';
@@ -52,7 +52,7 @@ export default function VerifyOtp() {
   }
 
   return (
-    <SafeAreaView style={styles.container}>
+    <Screen style={styles.container}>
       <View style={styles.form}>
         <Text style={styles.title}>Check your email</Text>
         <Text style={styles.body}>
@@ -79,7 +79,7 @@ export default function VerifyOtp() {
         />
         <Button title="Back" variant="ghost" onPress={() => router.back()} />
       </View>
-    </SafeAreaView>
+    </Screen>
   );
 }
 

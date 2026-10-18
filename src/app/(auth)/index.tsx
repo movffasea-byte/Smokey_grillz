@@ -1,8 +1,8 @@
 import { Image } from 'expo-image';
 import { useRouter } from 'expo-router';
 import { StyleSheet, Text, View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { Screen } from '@/components/ui/Screen';
 import { Button } from '@/components/ui/Button';
 import { colors } from '@/theme/colors';
 
@@ -10,7 +10,7 @@ export default function Welcome() {
   const router = useRouter();
 
   return (
-    <SafeAreaView style={styles.container}>
+    <Screen style={styles.container}>
       <View style={styles.hero}>
         <Image source={require('@/assets/logo.png')} style={styles.logo} contentFit="contain" />
         <Text style={styles.title}>Smokey Grillz</Text>
@@ -20,7 +20,7 @@ export default function Welcome() {
         <Button title="Create account" onPress={() => router.push('/sign-up')} />
         <Button title="Sign in" variant="ghost" onPress={() => router.push('/sign-in')} />
       </View>
-    </SafeAreaView>
+    </Screen>
   );
 }
 
