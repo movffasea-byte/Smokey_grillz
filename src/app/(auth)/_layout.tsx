@@ -2,7 +2,7 @@ import { Stack } from 'expo-router';
 
 import { colors } from '@/theme/colors';
 
-export const unstable_settings = { initialRouteName: 'welcome' };
+export const unstable_settings = { initialRouteName: 'index' };
 
 export default function AuthLayout() {
   return (
