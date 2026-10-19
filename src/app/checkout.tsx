@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import { Screen } from '@/components/ui/Screen';
+import { BankDetails } from '@/components/ui/BankDetails';
 import { Button } from '@/components/ui/Button';
 import { TextField } from '@/components/ui/TextField';
 import { fetchAddresses, type Address } from '@/lib/addresses';
@@ -82,6 +83,12 @@ export default function Checkout() {
         <Text style={styles.title}>Order placed 🎉</Text>
         <Text style={styles.muted}>Reference #{placedId.slice(0, 8).toUpperCase()}</Text>
         {payNote ? <Text style={styles.muted}>{payNote}</Text> : null}
+        {payment === 'transfer' ? (
+          <View style={styles.fullWidth}>
+            <Text style={styles.section}>Pay by bank transfer</Text>
+            <BankDetails store={store} reference={placedId.slice(0, 8).toUpperCase()} />
+          </View>
+        ) : null}
         <Text style={styles.muted}>
           {type === 'pickup' ? `Pick up at ${store?.address}.` : 'We will bring it to your address.'}
         </Text>
@@ -141,6 +148,7 @@ export default function Checkout() {
           <Choice label="Bank transfer" active={payment === 'transfer'} onPress={() => setPayment('transfer')} />
           <Choice label="Card (Flutterwave)" active={payment === 'card'} onPress={() => setPayment('card')} />
         </View>
+        {payment === 'transfer' ? <BankDetails store={store} /> : null}
 
         <TextField label="Notes (optional)" value={notes} onChangeText={setNotes} placeholder="e.g. no onions, extra spicy" />
 

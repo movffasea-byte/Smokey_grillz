@@ -3,7 +3,9 @@ import { useCallback, useEffect, useState } from 'react';
 import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import { Screen } from '@/components/ui/Screen';
+import { BankDetails } from '@/components/ui/BankDetails';
 import { Button } from '@/components/ui/Button';
+import { fetchStoreSettings, type StoreSettings } from '@/lib/checkout';
 import { payForOrder } from '@/lib/payments';
 import { formatNaira } from '@/lib/menu';
 import { fetchOrder, statusLabel, subscribeToOrders, type OrderDetail } from '@/lib/orders';
@@ -18,6 +20,7 @@ export default function OrderDetailScreen() {
   const [error, setError] = useState<string | null>(null);
   const [paying, setPaying] = useState(false);
   const [payError, setPayError] = useState<string | null>(null);
+  const [store, setStore] = useState<StoreSettings | null>(null);
 
   const load = useCallback(() => {
     fetchOrder(id)
@@ -30,6 +33,10 @@ export default function OrderDetailScreen() {
     load();
     return subscribeToOrders(load);
   }, [load]);
+
+  useEffect(() => {
+    fetchStoreSettings().then(setStore).catch(() => {});
+  }, []);
 
   if (loading) return <ActivityIndicator style={styles.center} color={colors.primary} />;
   if (error || !order) return <Text style={[styles.center, styles.error]}>{error ?? 'Order not found.'}</Text>;
@@ -90,6 +97,13 @@ export default function OrderDetailScreen() {
           <>
             {payError ? <Text style={styles.error}>{payError}</Text> : null}
             <Button title={`Pay ${formatNaira(order.total_kobo)} now`} onPress={pay} loading={paying} />
+          </>
+        ) : null}
+
+        {order.payment_method === 'transfer' && order.payment_status === 'unpaid' && order.status !== 'cancelled' ? (
+          <>
+            <Text style={styles.section}>Pay {formatNaira(order.total_kobo)} by transfer</Text>
+            <BankDetails store={store} reference={order.id.slice(0, 8).toUpperCase()} />
           </>
         ) : null}
 

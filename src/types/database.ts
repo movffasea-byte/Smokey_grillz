@@ -103,9 +103,9 @@ export type Database = {
         Relationships: []
       }
       store_settings: {
-        Row: { accepting_orders: boolean; address: string; hours: Json; id: number; instagram: string; lat: number | null; lng: number | null; name: string; phone: string | null; whatsapp: string | null }
-        Insert: { accepting_orders?: boolean; address?: string; hours?: Json; id?: number; instagram?: string; lat?: number | null; lng?: number | null; name?: string; phone?: string | null; whatsapp?: string | null }
-        Update: { accepting_orders?: boolean; address?: string; hours?: Json; id?: number; instagram?: string; lat?: number | null; lng?: number | null; name?: string; phone?: string | null; whatsapp?: string | null }
+        Row: { accepting_orders: boolean; account_name: string | null; account_number: string | null; address: string; bank_name: string | null; hours: Json; id: number; instagram: string; lat: number | null; lng: number | null; name: string; phone: string | null; whatsapp: string | null }
+        Insert: { accepting_orders?: boolean; account_name?: string | null; account_number?: string | null; address?: string; bank_name?: string | null; hours?: Json; id?: number; instagram?: string; lat?: number | null; lng?: number | null; name?: string; phone?: string | null; whatsapp?: string | null }
+        Update: { accepting_orders?: boolean; account_name?: string | null; account_number?: string | null; address?: string; bank_name?: string | null; hours?: Json; id?: number; instagram?: string; lat?: number | null; lng?: number | null; name?: string; phone?: string | null; whatsapp?: string | null }
         Relationships: []
       }
     }
