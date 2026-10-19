@@ -8,13 +8,17 @@ import { Button } from '@/components/ui/Button';
 import { fetchStoreSettings, type StoreSettings } from '@/lib/checkout';
 import { payForOrder } from '@/lib/payments';
 import { formatNaira } from '@/lib/menu';
-import { fetchOrder, statusLabel, subscribeToOrders, type OrderDetail } from '@/lib/orders';
+import { fetchOrder, markOrderPaid, nextStatus, setOrderStatus, statusLabel, subscribeToOrders, type OrderDetail } from '@/lib/orders';
+import { useAuth } from '@/providers/auth';
 import { colors } from '@/theme/colors';
 import { goBack } from '@/lib/navigation';
 
 export default function OrderDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
+  const { isStaff } = useAuth();
+  const [staffBusy, setStaffBusy] = useState(false);
+  const [staffError, setStaffError] = useState<string | null>(null);
   const [order, setOrder] = useState<OrderDetail | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -54,6 +58,20 @@ export default function OrderDetailScreen() {
       setPaying(false);
     }
   };
+  const staffAction = async (action: () => Promise<void>) => {
+    setStaffBusy(true);
+    setStaffError(null);
+    try {
+      await action();
+      load();
+    } catch (e) {
+      setStaffError(e instanceof Error ? e.message : 'Update failed');
+    } finally {
+      setStaffBusy(false);
+    }
+  };
+  const next = nextStatus(order);
+  const open = order.status !== 'completed' && order.status !== 'cancelled';
   const addressLine = (order.address as { line?: string } | null)?.line;
 
   return (
@@ -104,6 +122,18 @@ export default function OrderDetailScreen() {
           <>
             <Text style={styles.section}>Pay {formatNaira(order.total_kobo)} by transfer</Text>
             <BankDetails store={store} reference={order.id.slice(0, 8).toUpperCase()} />
+          </>
+        ) : null}
+
+        {isStaff && open ? (
+          <>
+            <Text style={styles.section}>Manage order</Text>
+            {staffError ? <Text style={styles.error}>{staffError}</Text> : null}
+            {order.payment_status === 'unpaid' && order.payment_method !== 'card' ? (
+              <Button title="Mark paid" variant="ghost" loading={staffBusy} onPress={() => staffAction(() => markOrderPaid(order.id))} />
+            ) : null}
+            {next ? <Button title={next.label} loading={staffBusy} onPress={() => staffAction(() => setOrderStatus(order.id, next.status))} /> : null}
+            <Button title="Cancel order" variant="ghost" loading={staffBusy} onPress={() => staffAction(() => setOrderStatus(order.id, 'cancelled'))} />
           </>
         ) : null}
 
