@@ -1,6 +1,7 @@
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 
+import { PushRegistration } from '@/components/PushRegistration';
 import { StaffOrderAlert } from '@/components/StaffOrderAlert';
 import { AuthProvider, useAuth } from '@/providers/auth';
 import { CartProvider } from '@/providers/cart';
@@ -12,6 +13,7 @@ function RootStack() {
 
   return (
     <>
+      <PushRegistration />
       {isStaff ? <StaffOrderAlert /> : null}
       <Stack
         screenOptions={{
