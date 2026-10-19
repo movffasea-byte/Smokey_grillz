@@ -16,6 +16,7 @@ import {
   subscribeToOrders,
   type StaffOrder,
 } from '@/lib/orders';
+import { desktopAlertPermission, requestDesktopAlerts } from '@/lib/staffAlerts';
 import { colors } from '@/theme/colors';
 
 type Filter = 'active' | 'done';
@@ -27,6 +28,7 @@ export default function StaffOrders() {
   const [loading, setLoading] = useState(true);
   const [busyId, setBusyId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [alertPermission, setAlertPermission] = useState(desktopAlertPermission());
 
   const load = useCallback(() => {
     fetchStaffOrders()
@@ -63,6 +65,14 @@ export default function StaffOrders() {
           <Text style={styles.back}>‹ Back</Text>
         </Pressable>
         <Text style={styles.title}>Incoming orders</Text>
+
+        {alertPermission === 'default' ? (
+          <Button
+            title="Enable desktop alerts for new orders"
+            variant="ghost"
+            onPress={() => requestDesktopAlerts().then(() => setAlertPermission(desktopAlertPermission()))}
+          />
+        ) : null}
 
         <View style={styles.tabs}>
           {(['active', 'done'] as const).map((f) => (

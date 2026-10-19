@@ -91,3 +91,14 @@ export async function markOrderPaid(id: string) {
   const { error } = await supabase.from('orders').update({ payment_status: 'paid' }).eq('id', id);
   if (error) throw error;
 }
+
+// Calls onInsert with each newly placed order (staff only: RLS limits non-staff to their own orders).
+export function subscribeToNewOrders(onInsert: (order: Order) => void): () => void {
+  const channel = supabase
+    .channel(`new-orders-${Math.random().toString(36).slice(2)}`)
+    .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'orders' }, (p) => onInsert(p.new as Order))
+    .subscribe();
+  return () => {
+    supabase.removeChannel(channel);
+  };
+}
