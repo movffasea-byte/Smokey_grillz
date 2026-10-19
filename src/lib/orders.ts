@@ -44,3 +44,50 @@ export function subscribeToOrders(onChange: () => void): () => void {
     supabase.removeChannel(channel);
   };
 }
+
+export type StaffOrder = Order & {
+  order_items: OrderItem[];
+  profiles: { full_name: string | null; phone: string | null } | null;
+};
+
+export const ACTIVE_STATUSES = ['pending', 'confirmed', 'preparing', 'ready', 'out_for_delivery'] as const;
+
+// Next status in the kitchen flow; pickup orders skip out_for_delivery.
+export function nextStatus(order: Pick<Order, 'status' | 'type'>): { status: string; label: string } | null {
+  switch (order.status) {
+    case 'pending':
+      return { status: 'confirmed', label: 'Confirm' };
+    case 'confirmed':
+      return { status: 'preparing', label: 'Start preparing' };
+    case 'preparing':
+      return { status: 'ready', label: 'Mark ready' };
+    case 'ready':
+      return order.type === 'delivery'
+        ? { status: 'out_for_delivery', label: 'Out for delivery' }
+        : { status: 'completed', label: 'Complete' };
+    case 'out_for_delivery':
+      return { status: 'completed', label: 'Complete' };
+    default:
+      return null;
+  }
+}
+
+export async function fetchStaffOrders(): Promise<StaffOrder[]> {
+  const { data, error } = await supabase
+    .from('orders')
+    .select('*, order_items(*), profiles(full_name, phone)')
+    .order('created_at', { ascending: false })
+    .limit(100);
+  if (error) throw error;
+  return data as unknown as StaffOrder[];
+}
+
+export async function setOrderStatus(id: string, status: string) {
+  const { error } = await supabase.from('orders').update({ status }).eq('id', id);
+  if (error) throw error;
+}
+
+export async function markOrderPaid(id: string) {
+  const { error } = await supabase.from('orders').update({ payment_status: 'paid' }).eq('id', id);
+  if (error) throw error;
+}

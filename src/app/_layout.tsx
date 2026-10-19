@@ -6,7 +6,7 @@ import { CartProvider } from '@/providers/cart';
 import { colors } from '@/theme/colors';
 
 function RootStack() {
-  const { session, loading } = useAuth();
+  const { session, loading, isStaff } = useAuth();
   if (loading) return null;
 
   return (
@@ -21,6 +21,9 @@ function RootStack() {
         <Stack.Screen name="checkout" />
         <Stack.Screen name="order/[id]" />
         <Stack.Screen name="payment-callback" />
+      </Stack.Protected>
+      <Stack.Protected guard={isStaff}>
+        <Stack.Screen name="staff" />
       </Stack.Protected>
       <Stack.Protected guard={!session}>
         <Stack.Screen name="(auth)" />

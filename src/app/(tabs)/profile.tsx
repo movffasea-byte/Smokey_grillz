@@ -1,3 +1,4 @@
+import { useRouter } from 'expo-router';
 import { useCallback, useEffect, useState } from 'react';
 import { KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
@@ -11,6 +12,7 @@ import { colors } from '@/theme/colors';
 
 export default function Profile() {
   const { session, profile, isStaff, signOut, updateProfile } = useAuth();
+  const router = useRouter();
   const [fullName, setFullName] = useState(profile?.full_name ?? '');
   const [phone, setPhone] = useState(profile?.phone ?? '');
   const [saving, setSaving] = useState(false);
@@ -85,6 +87,7 @@ export default function Profile() {
           <View style={styles.card}>
             <Text style={styles.line}>{session?.user.email}</Text>
             {isStaff ? <Text style={styles.badge}>{profile?.role}</Text> : null}
+            {isStaff ? <Button title="Manage orders" onPress={() => router.push('/staff')} /> : null}
             <TextField label="Full name" value={fullName} onChangeText={setFullName} />
             <TextField label="Phone" value={phone} onChangeText={setPhone} keyboardType="phone-pad" />
             <Button title={saved && !dirty ? 'Saved ✓' : 'Save changes'} onPress={save} loading={saving} disabled={!dirty} />
