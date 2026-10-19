@@ -5,10 +5,12 @@ import { AppState, Platform } from 'react-native';
 import type { Database } from '@/types/database';
 
 const url = process.env.EXPO_PUBLIC_SUPABASE_URL;
-const key = process.env.EXPO_PUBLIC_SUPABASE_KEY;
+const key = process.env.EXPO_PUBLIC_SUPABASE_KEY ?? process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY;
 
 if (!url || !key) {
-  throw new Error('Missing EXPO_PUBLIC_SUPABASE_URL or EXPO_PUBLIC_SUPABASE_KEY in .env.local');
+  throw new Error(
+    'Missing EXPO_PUBLIC_SUPABASE_URL or EXPO_PUBLIC_SUPABASE_KEY (or _ANON_KEY) in .env.local',
+  );
 }
 
 // Web static rendering runs in Node, where AsyncStorage touches `window`.
