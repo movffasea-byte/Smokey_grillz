@@ -24,9 +24,16 @@ Deno.serve(async (req) => {
   if (!safeEqual(sent, hash)) return text('invalid signature', 401);
 
   const event = await req.json().catch(() => null);
-  const data = event?.data;
+  // Flutterwave's webhook shape varies (v3 { event, data: { id, tx_ref } } vs legacy flat { id, txRef }),
+  // and some payloads carry both. Read the id and reference from wherever they are; everything
+  // else is re-verified with Flutterwave below.
+  const src = event?.data && typeof event.data === 'object' ? event.data : event;
+  const data = { id: src?.id ?? event?.id, tx_ref: src?.tx_ref ?? src?.txRef ?? event?.tx_ref ?? event?.txRef };
   // Acknowledge events we don't act on so Flutterwave doesn't keep retrying them.
-  if (event?.event !== 'charge.completed' || !data?.id || !data?.tx_ref) return text('ignored');
+  if (!data?.id || !data?.tx_ref) {
+    console.log('webhook ignored', JSON.stringify({ keys: Object.keys(event ?? {}), dataKeys: Object.keys(event?.data ?? {}) }));
+    return text('ignored');
+  }
 
   const admin = createClient(Deno.env.get('SUPABASE_URL')!, Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!);
   const { data: payment } = await admin
@@ -34,7 +41,10 @@ Deno.serve(async (req) => {
     .select('id, order_id, status, amount_kobo')
     .eq('reference', data.tx_ref)
     .maybeSingle();
-  if (!payment) return text('unknown reference');
+  if (!payment) {
+    console.log('webhook unknown reference', data.tx_ref);
+    return text('unknown reference');
+  }
   if (payment.status === 'successful') return text('already processed');
 
   // Never trust the webhook body: re-check the transaction with Flutterwave.
@@ -42,7 +52,11 @@ Deno.serve(async (req) => {
     headers: { Authorization: `Bearer ${secret}` },
   });
   const tx = (await res.json().catch(() => null))?.data;
-  if (!res.ok || !tx) return text('verification failed', 502);
+  if (!res.ok || !tx) {
+    console.log('webhook verify failed', res.status);
+    return text('verification failed', 502);
+  }
+  console.log('webhook verified', { status: tx.status, currency: tx.currency, amount: tx.amount, expected_kobo: payment.amount_kobo, ref_match: tx.tx_ref === data.tx_ref });
 
   const ok =
     tx.status === 'successful' &&
