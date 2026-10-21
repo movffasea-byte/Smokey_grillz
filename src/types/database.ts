@@ -115,6 +115,7 @@ export type Database = {
     Functions: {
       is_admin: { Args: never; Returns: boolean }
       is_staff: { Args: never; Returns: boolean }
+      set_user_role: { Args: { p_role: string; p_user_id: string }; Returns: undefined }
       place_order: {
         Args: {
           p_address?: Json

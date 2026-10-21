@@ -8,7 +8,7 @@ import { CartProvider } from '@/providers/cart';
 import { colors } from '@/theme/colors';
 
 function RootStack() {
-  const { session, loading, isStaff } = useAuth();
+  const { session, loading, isStaff, isAdmin } = useAuth();
   if (loading) return null;
 
   return (
@@ -32,6 +32,10 @@ function RootStack() {
           <Stack.Screen name="admin/menu" />
           <Stack.Screen name="admin/item" />
           <Stack.Screen name="admin/categories" />
+        </Stack.Protected>
+        <Stack.Protected guard={isAdmin}>
+          <Stack.Screen name="admin/settings" />
+          <Stack.Screen name="admin/roles" />
         </Stack.Protected>
         <Stack.Protected guard={!session}>
           <Stack.Screen name="(auth)" />

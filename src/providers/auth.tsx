@@ -11,6 +11,7 @@ type AuthState = {
   profile: Profile | null;
   loading: boolean;
   isStaff: boolean;
+  isAdmin: boolean;
   signOut: () => Promise<void>;
   updateProfile: (fields: { full_name: string; phone: string }) => Promise<void>;
 };
@@ -76,6 +77,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       profile,
       loading,
       isStaff: profile?.role === 'admin' || profile?.role === 'staff',
+      isAdmin: profile?.role === 'admin',
       signOut,
       updateProfile,
     }),
