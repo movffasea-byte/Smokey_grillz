@@ -33,6 +33,12 @@
         }
       ],
       [
+        "expo-image-picker",
+        {
+          "photosPermission": "Allow Smokey Grillz to access your photos so you can add menu item pictures."
+        }
+      ],
+      [
         "expo-splash-screen",
         {
           "backgroundColor": "#0D0D0F",

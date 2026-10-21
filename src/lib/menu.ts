@@ -18,7 +18,7 @@ export async function fetchCategories(): Promise<Category[]> {
 }
 
 export async function fetchMenuItems(): Promise<MenuItem[]> {
-  const { data, error } = await supabase.from('menu_items').select('*').eq('available', true).order('name');
+  const { data, error } = await supabase.from('menu_items').select('*').order('name');
   if (error) throw error;
   return data;
 }

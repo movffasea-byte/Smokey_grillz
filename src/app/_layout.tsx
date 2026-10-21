@@ -29,6 +29,9 @@ function RootStack() {
         </Stack.Protected>
         <Stack.Protected guard={isStaff}>
           <Stack.Screen name="staff" />
+          <Stack.Screen name="admin/menu" />
+          <Stack.Screen name="admin/item" />
+          <Stack.Screen name="admin/categories" />
         </Stack.Protected>
         <Stack.Protected guard={!session}>
           <Stack.Screen name="(auth)" />

@@ -88,6 +88,7 @@ export default function ItemDetail() {
         <Text style={styles.name}>{item.name}</Text>
         {item.description ? <Text style={styles.muted}>{item.description}</Text> : null}
         <Text style={styles.price}>{formatNaira(item.price_kobo)}</Text>
+        {item.available ? null : <Text style={styles.soldOut}>Sold out right now</Text>}
 
         {item.item_options.map((o) => (
           <View key={o.id} style={styles.group}>
@@ -124,7 +125,7 @@ export default function ItemDetail() {
           </Pressable>
         </View>
         <View style={styles.addBtn}>
-          <Button title={`Add · ${formatNaira(unitKobo * qty)}`} onPress={add} disabled={missingRequired} />
+          <Button title={`Add · ${formatNaira(unitKobo * qty)}`} onPress={add} disabled={missingRequired || !item.available} />
         </View>
       </View>
     </Screen>
@@ -139,6 +140,7 @@ const styles = StyleSheet.create({
   back: { color: colors.primary, fontSize: 17, fontWeight: '600', marginBottom: 8 },
   name: { color: colors.text, fontSize: 26, fontWeight: '800' },
   muted: { color: colors.textMuted, fontSize: 14, fontWeight: '400' },
+  soldOut: { color: colors.danger, fontSize: 15, fontWeight: '700' },
   price: { color: colors.primary, fontSize: 18, fontWeight: '700', marginBottom: 8 },
   group: { backgroundColor: colors.surface, borderRadius: 14, padding: 14, gap: 4, marginTop: 8, borderWidth: 1, borderColor: colors.border },
   groupTitle: { color: colors.text, fontSize: 16, fontWeight: '700', marginBottom: 6 },

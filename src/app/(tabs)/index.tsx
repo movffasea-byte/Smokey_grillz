@@ -37,7 +37,7 @@ export default function Menu() {
     () => (selected ? items.filter((i) => i.category_id === selected) : items),
     [items, selected],
   );
-  const featured = items.find((i) => i.featured) ?? items[0];
+  const featured = items.find((i) => i.featured && i.available) ?? items.find((i) => i.available);
 
   const openItem = (id: string) => router.push({ pathname: '/item/[id]', params: { id } });
 
@@ -110,12 +110,14 @@ export default function Menu() {
         ListEmptyComponent={<Text style={styles.muted}>Nothing here yet.</Text>}
         renderItem={({ item }) => (
           <Pressable style={styles.cardWrap} onPress={() => openItem(item.id)}>
-            <Glass style={styles.card}>
+            <Glass style={[styles.card, !item.available && styles.soldOut]}>
               <ItemImage uri={item.image_url} categorySlug={slugById[item.category_id]} height={96} />
               <Text style={styles.name} numberOfLines={2}>
                 {item.name}
               </Text>
-              <Text style={styles.price}>{formatNaira(item.price_kobo)}</Text>
+              <Text style={item.available ? styles.price : styles.soldOutLabel}>
+                {item.available ? formatNaira(item.price_kobo) : 'Sold out'}
+              </Text>
             </Glass>
           </Pressable>
         )}
@@ -161,4 +163,6 @@ const styles = StyleSheet.create({
   name: { color: colors.text, fontSize: 15, fontWeight: '700' },
   muted: { color: colors.textMuted, fontSize: 13 },
   price: { color: colors.primary, fontSize: 15, fontWeight: '700' },
+  soldOut: { opacity: 0.55 },
+  soldOutLabel: { color: colors.danger, fontSize: 15, fontWeight: '700' },
 });
