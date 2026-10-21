@@ -18,6 +18,7 @@
         "backgroundColor": "#0D0D0F",
         "foregroundImage": "./assets/adaptive-icon.png"
       },
+      "googleServicesFile": "./google-services.json",
       "predictiveBackGestureEnabled": false,
       "permissions": [
         "android.permission.RECORD_AUDIO"

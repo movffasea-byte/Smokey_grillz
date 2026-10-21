@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "845768271724",
+    "project_id": "smokey-grillz",
+    "storage_bucket": "smokey-grillz.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:845768271724:android:8eb98eca4aa1d9c8897549",
+        "android_client_info": {
+          "package_name": "com.smokeygrillz.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAfSwzZ8J4ukDzSr0JCZ_OjhJY_bwQ-0EI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
