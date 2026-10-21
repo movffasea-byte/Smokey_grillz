@@ -14,7 +14,7 @@ export function PushRegistration() {
 
   useEffect(() => {
     if (!userId) return;
-    registerForPush(userId).catch(() => {});
+    registerForPush(userId).catch((e) => console.warn('Push registration failed:', e));
   }, [userId]);
 
   useEffect(() => {
