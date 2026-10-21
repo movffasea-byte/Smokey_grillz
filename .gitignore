@@ -44,3 +44,6 @@ example
 
 # Firebase service-account keys (server secrets; upload to EAS, never commit)
 *-firebase-adminsdk-*.json
+
+# Supabase CLI local cache
+supabase/.temp/

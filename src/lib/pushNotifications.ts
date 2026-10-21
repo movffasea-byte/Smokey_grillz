@@ -28,6 +28,9 @@ export async function registerForPush(userId: string): Promise<void> {
     await Notifications.setNotificationChannelAsync('default', {
       name: 'Orders',
       importance: Notifications.AndroidImportance.HIGH,
+      sound: 'default',
+      enableVibrate: true,
+      vibrationPattern: [0, 250, 250, 250],
     });
   }
 
