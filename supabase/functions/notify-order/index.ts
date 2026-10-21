@@ -31,13 +31,13 @@ Deno.serve(async (req) => {
   if (!secret) return text('not configured', 500);
   if (!safeEqual(req.headers.get('x-notify-secret') ?? '', secret)) return text('invalid secret', 401);
 
-  const { event, order_id } = await req.json().catch(() => ({}));
-  if (!order_id || !['INSERT', 'UPDATE'].includes(event)) return text('ignored');
+  const { kind, order_id } = await req.json().catch(() => ({}));
+  if (!order_id || !['new_order', 'status'].includes(kind)) return text('ignored');
 
   const admin = createClient(Deno.env.get('SUPABASE_URL')!, Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!);
   const { data: order } = await admin
     .from('orders')
-    .select('id, user_id, status, type, total_kobo')
+    .select('id, user_id, status, type, total_kobo, payment_method, payment_status')
     .eq('id', order_id)
     .maybeSingle();
   if (!order) return text('unknown order');
@@ -45,18 +45,20 @@ Deno.serve(async (req) => {
   const ref = order.id.slice(0, 8).toUpperCase();
   const messages: Push[] = [];
 
-  if (event === 'INSERT') {
+  if (kind === 'new_order') {
     const { data: staff } = await admin
       .from('profiles')
       .select('push_token')
       .in('role', ['staff', 'admin'])
       .not('push_token', 'is', null);
     const total = `₦${(order.total_kobo / 100).toLocaleString('en-NG')}`;
-    for (const s of staff ?? []) {
+    const paid = order.payment_method === 'card' ? ' · Paid by card' : '';
+    // One message per device even if two staff accounts share a token.
+    for (const token of new Set((staff ?? []).map((s) => s.push_token!))) {
       messages.push({
-        to: s.push_token!,
+        to: token,
         title: 'New order',
-        body: `#${ref} · ${total} · ${order.type === 'pickup' ? 'Pickup' : 'Delivery'}`,
+        body: `#${ref} · ${total} · ${order.type === 'pickup' ? 'Pickup' : 'Delivery'}${paid}`,
         sound: 'default',
         data: { screen: 'staff', orderId: order.id },
         channelId: 'default',
@@ -78,17 +80,26 @@ Deno.serve(async (req) => {
 
   if (messages.length === 0) return text('no recipients');
 
-  const res = await fetch('https://exp.host/--/api/v2/push/send', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
-    body: JSON.stringify(messages),
-  });
-  const tickets = (await res.json().catch(() => null))?.data;
+  // Expo accepts at most 100 messages per request.
+  const dead: string[] = [];
+  for (let i = 0; i < messages.length; i += 100) {
+    const batch = messages.slice(i, i + 100);
+    const res = await fetch('https://exp.host/--/api/v2/push/send', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+      body: JSON.stringify(batch),
+    });
+    const tickets = (await res.json().catch(() => null))?.data;
+    if (!Array.isArray(tickets)) {
+      console.log('expo push failed', res.status);
+      continue;
+    }
+    batch.forEach((m, j) => {
+      if (tickets[j]?.details?.error === 'DeviceNotRegistered') dead.push(m.to);
+    });
+  }
 
   // Forget tokens Expo says are dead so we stop sending to them.
-  if (Array.isArray(tickets)) {
-    const dead = messages.filter((_, i) => tickets[i]?.details?.error === 'DeviceNotRegistered').map((m) => m.to);
-    if (dead.length) await admin.from('profiles').update({ push_token: null }).in('push_token', dead);
-  }
+  if (dead.length) await admin.from('profiles').update({ push_token: null }).in('push_token', dead);
   return text('sent');
 });

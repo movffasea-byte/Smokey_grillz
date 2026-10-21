@@ -1,6 +1,7 @@
 import type { Session } from '@supabase/supabase-js';
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
 
+import { clearPushToken } from '@/lib/pushNotifications';
 import { supabase } from '@/lib/supabase';
 import type { Tables } from '@/types/database';
 
@@ -58,8 +59,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [userId]);
 
   const signOut = useCallback(async () => {
+    // Stop pushes for this account reaching the device; needs the session, so do it first.
+    if (userId) await clearPushToken(userId).catch(() => {});
     await supabase.auth.signOut();
-  }, []);
+  }, [userId]);
 
   const updateProfile = useCallback(
     async (fields: { full_name: string; phone: string }) => {
