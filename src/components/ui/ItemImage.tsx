@@ -9,6 +9,8 @@ const EMOJI: Record<string, string> = {
   'gas-meat': '🍖',
   noodles: '🍜',
   masa: '🥞',
+  chips: '🍟',
+  'grilled-chicken': '🍗',
 };
 
 type Props = { uri: string | null; categorySlug?: string; size?: number; height?: number };
