@@ -48,6 +48,7 @@ export function subscribeToOrders(onChange: () => void): () => void {
 export type StaffOrder = Order & {
   order_items: OrderItem[];
   profiles: { full_name: string | null; phone: string | null } | null;
+  claimer: { full_name: string | null } | null;
 };
 
 export const ACTIVE_STATUSES = ['pending', 'confirmed', 'preparing', 'ready', 'out_for_delivery'] as const;
@@ -75,7 +76,7 @@ export function nextStatus(order: Pick<Order, 'status' | 'type'>): { status: str
 export async function fetchStaffOrders(): Promise<StaffOrder[]> {
   const { data, error } = await supabase
     .from('orders')
-    .select('*, order_items(*), profiles(full_name, phone)')
+    .select('*, order_items(*), profiles!orders_user_id_fkey(full_name, phone), claimer:profiles!orders_claimed_by_fkey(full_name)')
     .order('created_at', { ascending: false })
     .limit(100);
   if (error) throw error;
@@ -85,6 +86,21 @@ export async function fetchStaffOrders(): Promise<StaffOrder[]> {
 export async function setOrderStatus(id: string, status: string) {
   const { error } = await supabase.from('orders').update({ status }).eq('id', id);
   if (error) throw error;
+}
+
+export async function claimOrder(id: string) {
+  const { error } = await supabase.rpc('claim_order', { p_order_id: id });
+  if (error) throw error;
+}
+
+export async function releaseOrder(id: string) {
+  const { error } = await supabase.rpc('release_order', { p_order_id: id });
+  if (error) throw error;
+}
+
+// Staff may only work claimed orders they hold themselves; admins can act on any order.
+export function canWorkOrder(order: Pick<Order, 'claimed_by'>, userId: string | undefined, isAdmin: boolean) {
+  return isAdmin || (!!userId && order.claimed_by === userId);
 }
 
 export async function markOrderPaid(id: string) {

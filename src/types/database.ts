@@ -74,10 +74,11 @@ export type Database = {
         ]
       }
       orders: {
-        Row: { address: Json | null; created_at: string; delivery_fee_kobo: number; delivery_zone_id: string | null; id: string; notes: string | null; payment_method: string; payment_status: string; status: string; subtotal_kobo: number; total_kobo: number; type: string; user_id: string }
-        Insert: { address?: Json | null; created_at?: string; delivery_fee_kobo?: number; delivery_zone_id?: string | null; id?: string; notes?: string | null; payment_method?: string; payment_status?: string; status?: string; subtotal_kobo: number; total_kobo: number; type: string; user_id: string }
-        Update: { address?: Json | null; created_at?: string; delivery_fee_kobo?: number; delivery_zone_id?: string | null; id?: string; notes?: string | null; payment_method?: string; payment_status?: string; status?: string; subtotal_kobo?: number; total_kobo?: number; type?: string; user_id?: string }
+        Row: { address: Json | null; claimed_at: string | null; claimed_by: string | null; created_at: string; delivery_fee_kobo: number; delivery_zone_id: string | null; id: string; notes: string | null; payment_method: string; payment_status: string; status: string; subtotal_kobo: number; total_kobo: number; type: string; user_id: string }
+        Insert: { address?: Json | null; claimed_at?: string | null; claimed_by?: string | null; created_at?: string; delivery_fee_kobo?: number; delivery_zone_id?: string | null; id?: string; notes?: string | null; payment_method?: string; payment_status?: string; status?: string; subtotal_kobo: number; total_kobo: number; type: string; user_id: string }
+        Update: { address?: Json | null; claimed_at?: string | null; claimed_by?: string | null; created_at?: string; delivery_fee_kobo?: number; delivery_zone_id?: string | null; id?: string; notes?: string | null; payment_method?: string; payment_status?: string; status?: string; subtotal_kobo?: number; total_kobo?: number; type?: string; user_id?: string }
         Relationships: [
+          { foreignKeyName: "orders_claimed_by_fkey"; columns: ["claimed_by"]; isOneToOne: false; referencedRelation: "profiles"; referencedColumns: ["id"] },
           { foreignKeyName: "orders_delivery_zone_id_fkey"; columns: ["delivery_zone_id"]; isOneToOne: false; referencedRelation: "delivery_zones"; referencedColumns: ["id"] },
           { foreignKeyName: "orders_user_id_fkey"; columns: ["user_id"]; isOneToOne: false; referencedRelation: "profiles"; referencedColumns: ["id"] },
         ]
@@ -115,6 +116,8 @@ export type Database = {
     Functions: {
       is_admin: { Args: never; Returns: boolean }
       is_staff: { Args: never; Returns: boolean }
+      claim_order: { Args: { p_order_id: string }; Returns: undefined }
+      release_order: { Args: { p_order_id: string }; Returns: undefined }
       set_user_role: { Args: { p_role: string; p_user_id: string }; Returns: undefined }
       place_order: {
         Args: {

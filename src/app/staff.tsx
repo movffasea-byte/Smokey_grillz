@@ -8,21 +8,27 @@ import { formatNaira } from '@/lib/menu';
 import { goBack } from '@/lib/navigation';
 import {
   ACTIVE_STATUSES,
+  canWorkOrder,
+  claimOrder,
   fetchStaffOrders,
   markOrderPaid,
   nextStatus,
+  releaseOrder,
   setOrderStatus,
   statusLabel,
   subscribeToOrders,
   type StaffOrder,
 } from '@/lib/orders';
 import { desktopAlertPermission, requestDesktopAlerts } from '@/lib/staffAlerts';
+import { useAuth } from '@/providers/auth';
 import { colors } from '@/theme/colors';
 
 type Filter = 'active' | 'done';
 
 export default function StaffOrders() {
   const router = useRouter();
+  const { session, isAdmin } = useAuth();
+  const userId = session?.user.id;
   const [orders, setOrders] = useState<StaffOrder[]>([]);
   const [filter, setFilter] = useState<Filter>('active');
   const [loading, setLoading] = useState(true);
@@ -114,13 +120,29 @@ export default function StaffOrders() {
                 {formatNaira(o.total_kobo)} · {o.payment_method} · {o.payment_status}
               </Text>
 
-              {isActive(o) ? (
+              {isActive(o) && o.claimed_by ? (
+                <Text style={styles.claim}>
+                  {o.claimed_by === userId ? 'Claimed by you' : `Handled by ${o.claimer?.full_name || 'another staff member'}`}
+                </Text>
+              ) : null}
+
+              {isActive(o) && !o.claimed_by ? (
+                <View style={styles.actions}>
+                  <Button title="Claim order" loading={busy} onPress={() => run(o.id, () => claimOrder(o.id))} />
+                  {isAdmin ? (
+                    <Button title="Cancel order" variant="ghost" loading={busy} onPress={() => run(o.id, () => setOrderStatus(o.id, 'cancelled'))} />
+                  ) : null}
+                </View>
+              ) : null}
+
+              {isActive(o) && o.claimed_by && canWorkOrder(o, userId, isAdmin) ? (
                 <View style={styles.actions}>
                   {o.payment_status === 'unpaid' && o.payment_method !== 'card' ? (
                     <Button title="Mark paid" variant="ghost" loading={busy} onPress={() => run(o.id, () => markOrderPaid(o.id))} />
                   ) : null}
                   {next ? <Button title={next.label} loading={busy} onPress={() => run(o.id, () => setOrderStatus(o.id, next.status))} /> : null}
                   <Button title="Cancel order" variant="ghost" loading={busy} onPress={() => run(o.id, () => setOrderStatus(o.id, 'cancelled'))} />
+                  <Button title="Release order" variant="ghost" loading={busy} onPress={() => run(o.id, () => releaseOrder(o.id))} />
                 </View>
               ) : null}
             </View>
@@ -145,6 +167,7 @@ const styles = StyleSheet.create({
   head: { flexDirection: 'row', justifyContent: 'space-between' },
   name: { color: colors.text, fontSize: 16, fontWeight: '700' },
   status: { color: colors.primary, fontWeight: '700' },
+  claim: { color: colors.textMuted, fontWeight: '600' },
   line: { color: colors.text, fontSize: 15 },
   muted: { color: colors.textMuted, fontSize: 14 },
   actions: { gap: 8, marginTop: 8 },

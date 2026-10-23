@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/Button';
 import { fetchStoreSettings, type StoreSettings } from '@/lib/checkout';
 import { payForOrder } from '@/lib/payments';
 import { formatNaira } from '@/lib/menu';
-import { fetchOrder, markOrderPaid, nextStatus, setOrderStatus, statusLabel, subscribeToOrders, type OrderDetail } from '@/lib/orders';
+import { canWorkOrder, claimOrder, fetchOrder, markOrderPaid, nextStatus, releaseOrder, setOrderStatus, statusLabel, subscribeToOrders, type OrderDetail } from '@/lib/orders';
 import { useAuth } from '@/providers/auth';
 import { colors } from '@/theme/colors';
 import { goBack } from '@/lib/navigation';
@@ -16,7 +16,8 @@ import { goBack } from '@/lib/navigation';
 export default function OrderDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
-  const { isStaff } = useAuth();
+  const { isStaff, isAdmin, session } = useAuth();
+  const userId = session?.user.id;
   const [staffBusy, setStaffBusy] = useState(false);
   const [staffError, setStaffError] = useState<string | null>(null);
   const [order, setOrder] = useState<OrderDetail | null>(null);
@@ -129,11 +130,22 @@ export default function OrderDetailScreen() {
           <>
             <Text style={styles.section}>Manage order</Text>
             {staffError ? <Text style={styles.error}>{staffError}</Text> : null}
+            {!order.claimed_by ? (
+              <Button title="Claim order" loading={staffBusy} onPress={() => staffAction(() => claimOrder(order.id))} />
+            ) : null}
+            {order.claimed_by && !canWorkOrder(order, userId, isAdmin) ? (
+              <Text style={styles.muted}>This order is being handled by another staff member.</Text>
+            ) : null}
+            {order.claimed_by && canWorkOrder(order, userId, isAdmin) ? (
+              <>
             {order.payment_status === 'unpaid' && order.payment_method !== 'card' ? (
               <Button title="Mark paid" variant="ghost" loading={staffBusy} onPress={() => staffAction(() => markOrderPaid(order.id))} />
             ) : null}
             {next ? <Button title={next.label} loading={staffBusy} onPress={() => staffAction(() => setOrderStatus(order.id, next.status))} /> : null}
             <Button title="Cancel order" variant="ghost" loading={staffBusy} onPress={() => staffAction(() => setOrderStatus(order.id, 'cancelled'))} />
+            <Button title="Release order" variant="ghost" loading={staffBusy} onPress={() => staffAction(() => releaseOrder(order.id))} />
+              </>
+            ) : null}
           </>
         ) : null}
 
