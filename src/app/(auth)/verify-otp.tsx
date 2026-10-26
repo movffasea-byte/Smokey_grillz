@@ -17,13 +17,16 @@ export default function VerifyOtp() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [info, setInfo] = useState<string | null>(null);
-  const [cooldown, setCooldown] = useState(RESEND_SECONDS);
+  // Count down to a fixed time instead of decrementing, so the wait keeps running while the app is minimized.
+  const [resendAt, setResendAt] = useState(() => Date.now() + RESEND_SECONDS * 1000);
+  const [now, setNow] = useState(() => Date.now());
+  const cooldown = Math.max(0, Math.ceil((resendAt - now) / 1000));
 
   useEffect(() => {
     if (cooldown <= 0) return;
-    const t = setTimeout(() => setCooldown((c) => c - 1), 1000);
-    return () => clearTimeout(t);
-  }, [cooldown]);
+    const t = setInterval(() => setNow(Date.now()), 1000);
+    return () => clearInterval(t);
+  }, [cooldown > 0]);
 
   async function onVerify() {
     const token = code.trim();
@@ -48,7 +51,8 @@ export default function VerifyOtp() {
       return;
     }
     setInfo('A new code is on its way.');
-    setCooldown(RESEND_SECONDS);
+    setNow(Date.now());
+    setResendAt(Date.now() + RESEND_SECONDS * 1000);
   }
 
   return (
