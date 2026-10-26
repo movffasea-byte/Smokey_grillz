@@ -1,3 +1,4 @@
+import { Ionicons } from '@expo/vector-icons';
 import { Tabs } from 'expo-router';
 
 import { glassBar } from '@/components/ui/Glass';
@@ -15,10 +16,10 @@ export default function TabsLayout() {
         tabBarInactiveTintColor: colors.textMuted,
         tabBarStyle: { ...glassBar, position: 'absolute', borderTopColor: colors.border },
       }}>
-      <Tabs.Screen name="index" options={{ title: 'Menu' }} />
-      <Tabs.Screen name="cart" options={{ title: 'Cart', tabBarBadge: count > 0 ? count : undefined }} />
-      <Tabs.Screen name="orders" options={{ title: 'Orders' }} />
-      <Tabs.Screen name="profile" options={{ title: 'Profile' }} />
+      <Tabs.Screen name="index" options={{ title: 'Menu', tabBarIcon: ({ color, size }) => <Ionicons name="restaurant-outline" size={size} color={color as string} /> }} />
+      <Tabs.Screen name="cart" options={{ title: 'Cart', tabBarIcon: ({ color, size }) => <Ionicons name="cart-outline" size={size} color={color as string} />, tabBarBadge: count > 0 ? count : undefined }} />
+      <Tabs.Screen name="orders" options={{ title: 'Orders', tabBarIcon: ({ color, size }) => <Ionicons name="receipt-outline" size={size} color={color as string} /> }} />
+      <Tabs.Screen name="profile" options={{ title: 'Profile', tabBarIcon: ({ color, size }) => <Ionicons name="person-outline" size={size} color={color as string} /> }} />
     </Tabs>
   );
 }
