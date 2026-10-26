@@ -13,7 +13,7 @@ export default function Welcome() {
     <Screen style={styles.container}>
       <View style={styles.hero}>
         <Image source={require('@/assets/logo.png')} style={styles.logo} contentFit="contain" />
-        <Text style={styles.title}>Smokey Grillz</Text>
+        <Text style={styles.title}>Jai'fore Grillz</Text>
         <Text style={styles.subtitle}>Shawarma, loaded fries, gas meat, noodles and masa. Fresh off the grill.</Text>
       </View>
       <View style={styles.actions}>

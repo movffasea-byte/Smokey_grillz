@@ -50,7 +50,7 @@ export default function Menu() {
         <Image source={require('@/assets/logo.png')} style={styles.logo} contentFit="contain" />
         <View>
           <Text style={styles.eyebrow}>Kaduna's grill spot</Text>
-          <Text style={styles.title}>Smokey Grillz</Text>
+          <Text style={styles.title}>Jai'fore Grillz</Text>
         </View>
       </View>
       {storeOpen ? null : <ClosedBanner />}
@@ -144,7 +144,7 @@ const styles = StyleSheet.create({
   title: { color: colors.text, fontSize: 30, fontWeight: '800' },
   bento: { flexDirection: 'row', gap: 12 },
   featuredWrap: { flex: 3 },
-  featured: { flex: 1, padding: 12, gap: 6, borderColor: 'rgba(232,112,10,0.55)' },
+  featured: { flex: 1, padding: 12, gap: 6, borderColor: 'rgba(138,92,214,0.6)' },
   featuredImage: { marginVertical: 4 },
   side: { flex: 2, gap: 12 },
   sideWrap: { flex: 1 },

@@ -26,7 +26,7 @@ export function Screen({ style, children, ...rest }: SafeAreaViewProps) {
   return (
     <View style={styles.root}>
       <Glow color={colors.primary} size={420} style={{ top: -140, right: -160 }} />
-      <Glow color={colors.primaryDeep} size={380} style={{ bottom: -160, left: -170 }} />
+      <Glow color={colors.accent} size={380} style={{ bottom: -160, left: -170 }} />
       <SafeAreaView style={[styles.fill, style]} {...rest}>
         {children}
       </SafeAreaView>
